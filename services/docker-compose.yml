@@ -1,0 +1,28 @@
+version: '3'
+services:
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    # ports:
+    #   - "9999:3306"
+    expose:
+      - 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+  # webserver
+  weblang:
+    restart: always
+    privileged: true
+    userns_mode: host
+    image: ggssh/weblang:v1.0
+    volumes:
+      - ./weblang/startup.sh:/workspace/startup.sh:ro
+      - ./weblang/test.wbl:/workspace/test.wbl:ro
+    ports:
+      - "9999:9000"
+    entrypoint: ["/bin/bash","/workspace/startup.sh"]
+    depends_on:
+      - mysql
+    links:
+      - "mysql:weblang_mysql"
